@@ -5,7 +5,7 @@
 ## Installation
 
 ```bash
-brew tap yourusername/rustnet
+brew tap domcyrus/rustnet
 brew install rustnet
 ```
 
