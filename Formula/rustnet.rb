@@ -59,7 +59,7 @@ class Rustnet < Formula
     end
 
     s += <<~EOS
-      For more information, see: https://github.com/yourusername/rustnet#permissions
+      For more information, see: https://github.com/domcyrus/rustnet#permissions
     EOS
 
     s
