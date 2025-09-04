@@ -1,6 +1,6 @@
 # Homebrew RustNet
 
-Homebrew tap for [RustNet](https://github.com/domcyrus/rustnet) - a high-performance, cross-platform network monitoring terminal UI tool built with Rust.
+Homebrew tap for [RustNet](https://github.com/domcyrus/rustnet) - a real-time, cross-platform network monitoring terminal UI tool built with Rust.
 
 ## About RustNet
 
