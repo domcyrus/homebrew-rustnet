@@ -1,8 +1,8 @@
 class Rustnet < Formula
   desc "High-performance, cross-platform network monitoring tool with TUI"
   homepage "https://github.com/domcyrus/rustnet"
-  url "https://github.com/domcyrus/rustnet/archive/refs/tags/v0.10.0.tar.gz"
-  sha256 "226aead5ba11c7b625d5e2488818474783ee32165b2a20042ef513654a55c6cd"
+  url "https://github.com/domcyrus/rustnet/archive/refs/tags/v0.11.0.tar.gz"
+  sha256 "389afa61c1d4b2b2d6849617a0940ed2b34106961ac223309bfa52753e59a8ef"
   license "Apache-2.0"
 
   depends_on "rust" => :build
