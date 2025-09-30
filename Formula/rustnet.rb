@@ -12,10 +12,16 @@ class Rustnet < Formula
 
   on_linux do
     depends_on "libpcap"
+    depends_on "elfutils"
+    depends_on "llvm" => :build
   end
 
+  uses_from_macos "zlib"
+
   def install
-    system "cargo", "install", *std_cargo_args
+    args = std_cargo_args
+    args += ["--features", "linux-default"] if OS.linux?
+    system "cargo", "install", *args
   end
 
   def caveats
