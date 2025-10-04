@@ -1,8 +1,8 @@
 class Rustnet < Formula
   desc "High-performance, cross-platform network monitoring tool with TUI"
   homepage "https://github.com/domcyrus/rustnet"
-  url "https://github.com/domcyrus/rustnet/archive/refs/tags/v0.12.0.tar.gz"
-  sha256 "ea47840b297b9d819643238b246170938ca6139c32ef59126e567e88829f8374"
+  url "https://github.com/domcyrus/rustnet/archive/refs/tags/v0.13.0.tar.gz"
+  sha256 "fb1b429b8a9a68bfeab489aafa5d4e2c42e1525ac626331e8918e50c932e7be9"
   license "Apache-2.0"
 
   depends_on "rust" => :build
@@ -43,9 +43,14 @@ class Rustnet < Formula
            - This will create the access_bpf group and configure BPF permissions
            - Log out and back in for changes to take effect
            - Then run rustnet without sudo
-
-        3. Manual BPF configuration:
+           
+        3. Manual BPF configuration (alternative to option 2):
            sudo dseditgroup -o edit -a $USER -t user access_bpf
+           Log out and back in for changes to take effect
+        
+        Note: Options 2 and 3 allow running without sudo, but will use lsof for
+        process identification instead of PKTAP. Both work, but PKTAP (option 1)
+        is faster and more accurate.
 
       EOS
     end
