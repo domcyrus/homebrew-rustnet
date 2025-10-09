@@ -48,6 +48,7 @@ rustnet
 ## Links
 
 - **Main Project**: https://github.com/domcyrus/rustnet
-- **Documentation**: https://github.com/domcyrus/rustnet#permissions
+- **Documentation**: https://github.com/domcyrus/rustnet
+  - **Permissions**: https://github.com/domcyrus/rustnet/blob/main/INSTALL.md#permissions-setup
 - **Issues**: https://github.com/domcyrus/rustnet/issues
 
