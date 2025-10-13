@@ -89,17 +89,25 @@ jobs:
           echo "Changes:"
           git diff "$FORMULA_FILE"
 
-      - name: Tap the local formula
+      - name: Create temporary tap for validation
         if: steps.check.outputs.needs_update == 'true'
         run: |
-          # Tap this repository locally for testing
-          brew tap domcyrus/rustnet "$GITHUB_WORKSPACE"
+          # Create a temporary local tap for validation
+          brew tap-new temp/rustnet --no-git
+
+          # Copy the updated formula to the temp tap
+          cp Formula/rustnet.rb "$(brew --repository)/Library/Taps/temp/homebrew-rustnet/Formula/"
 
       - name: Validate formula with brew audit
         if: steps.check.outputs.needs_update == 'true'
         run: |
           echo "Running brew audit on updated formula..."
-          brew audit --strict --online --formula domcyrus/rustnet/rustnet
+          brew audit --strict --online --formula temp/rustnet/rustnet
+
+      - name: Clean up temporary tap
+        if: always() && steps.check.outputs.needs_update == 'true'
+        run: |
+          brew untap temp/rustnet || true
 
       - name: Commit and push changes
         if: steps.check.outputs.needs_update == 'true'
