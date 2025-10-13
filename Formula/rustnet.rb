@@ -13,8 +13,8 @@ class Rustnet < Formula
 
   on_linux do
     depends_on "elfutils"
-    depends_on "libpcap"
     depends_on "llvm" => :build
+    depends_on "libpcap"
   end
 
   def install
