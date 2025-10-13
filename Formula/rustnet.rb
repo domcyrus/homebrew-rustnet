@@ -5,18 +5,17 @@ class Rustnet < Formula
   sha256 "fb1b429b8a9a68bfeab489aafa5d4e2c42e1525ac626331e8918e50c932e7be9"
   license "Apache-2.0"
 
-  depends_on "rust" => :build
   depends_on "pkg-config" => :build
+  depends_on "rust" => :build
 
   uses_from_macos "libpcap"
+  uses_from_macos "zlib"
 
   on_linux do
-    depends_on "libpcap"
     depends_on "elfutils"
+    depends_on "libpcap"
     depends_on "llvm" => :build
   end
-
-  uses_from_macos "zlib"
 
   def install
     args = std_cargo_args
@@ -43,11 +42,11 @@ class Rustnet < Formula
            - This will create the access_bpf group and configure BPF permissions
            - Log out and back in for changes to take effect
            - Then run rustnet without sudo
-           
+
         3. Manual BPF configuration (alternative to option 2):
            sudo dseditgroup -o edit -a $USER -t user access_bpf
            Log out and back in for changes to take effect
-        
+
         Note: Options 2 and 3 allow running without sudo, but will use lsof for
         process identification instead of PKTAP. Both work, but PKTAP (option 1)
         is faster and more accurate.
