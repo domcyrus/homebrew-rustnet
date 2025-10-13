@@ -45,6 +45,10 @@ sudo setcap cap_net_raw,cap_net_admin=eip $(which rustnet)
 rustnet
 ```
 
+## Automatic Updates
+
+This tap is automatically updated hourly via GitHub Actions. When a new RustNet release is published, the formula is updated with the latest version and SHA256 checksum.
+
 ## Links
 
 - **Main Project**: https://github.com/domcyrus/rustnet

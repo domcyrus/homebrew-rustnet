@@ -1,0 +1,142 @@
+name: Update Homebrew Formula
+
+on:
+  # Run every hour
+  schedule:
+    - cron: '0 * * * *'
+
+  # Allow manual trigger for testing
+  workflow_dispatch:
+
+jobs:
+  check-and-update:
+    runs-on: macos-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout tap repository
+        uses: actions/checkout@v4
+
+      - name: Get current formula version
+        id: current
+        run: |
+          CURRENT_VERSION=$(grep -oE 'archive/refs/tags/v[0-9]+\.[0-9]+\.[0-9]+' Formula/rustnet.rb | sed 's|archive/refs/tags/v||')
+          echo "version=$CURRENT_VERSION" >> $GITHUB_OUTPUT
+          echo "Current formula version: v$CURRENT_VERSION"
+
+      - name: Get latest release from rustnet repo
+        id: latest
+        run: |
+          # Query GitHub API for latest release
+          LATEST_RELEASE=$(curl -s https://api.github.com/repos/domcyrus/rustnet/releases/latest)
+          LATEST_VERSION=$(echo "$LATEST_RELEASE" | jq -r '.tag_name' | sed 's/^v//')
+
+          echo "version=$LATEST_VERSION" >> $GITHUB_OUTPUT
+          echo "Latest rustnet version: v$LATEST_VERSION"
+
+      - name: Check if update is needed
+        id: check
+        run: |
+          CURRENT="${{ steps.current.outputs.version }}"
+          LATEST="${{ steps.latest.outputs.version }}"
+
+          if [ "$CURRENT" = "$LATEST" ]; then
+            echo "needs_update=false" >> $GITHUB_OUTPUT
+            echo "Formula is already up to date (v$CURRENT)"
+          else
+            echo "needs_update=true" >> $GITHUB_OUTPUT
+            echo "Update needed: v$CURRENT -> v$LATEST"
+          fi
+
+      - name: Download release tarball and calculate SHA256
+        if: steps.check.outputs.needs_update == 'true'
+        id: sha256
+        run: |
+          VERSION="${{ steps.latest.outputs.version }}"
+          URL="https://github.com/domcyrus/rustnet/archive/refs/tags/v${VERSION}.tar.gz"
+
+          echo "Downloading tarball from: $URL"
+          curl -L -o /tmp/rustnet.tar.gz "$URL"
+
+          # Calculate SHA256
+          SHA256=$(shasum -a 256 /tmp/rustnet.tar.gz | awk '{print $1}')
+          echo "sha256=$SHA256" >> $GITHUB_OUTPUT
+          echo "Calculated SHA256: $SHA256"
+
+          # Clean up
+          rm /tmp/rustnet.tar.gz
+
+      - name: Update formula
+        if: steps.check.outputs.needs_update == 'true'
+        run: |
+          VERSION="${{ steps.latest.outputs.version }}"
+          SHA256="${{ steps.sha256.outputs.sha256 }}"
+          FORMULA_FILE="Formula/rustnet.rb"
+
+          echo "Updating formula with:"
+          echo "  Version: v$VERSION"
+          echo "  SHA256: $SHA256"
+
+          # Update the URL line
+          sed -i '' "s|url \"https://github.com/domcyrus/rustnet/archive/refs/tags/v.*\.tar\.gz\"|url \"https://github.com/domcyrus/rustnet/archive/refs/tags/v${VERSION}.tar.gz\"|" "$FORMULA_FILE"
+
+          # Update the SHA256 line
+          sed -i '' "s|sha256 \".*\"|sha256 \"${SHA256}\"|" "$FORMULA_FILE"
+
+          echo "Formula updated successfully"
+          echo ""
+          echo "Changes:"
+          git diff "$FORMULA_FILE"
+
+      - name: Tap the local formula
+        if: steps.check.outputs.needs_update == 'true'
+        run: |
+          # Tap this repository locally for testing
+          brew tap domcyrus/rustnet "$GITHUB_WORKSPACE"
+
+      - name: Validate formula with brew audit
+        if: steps.check.outputs.needs_update == 'true'
+        run: |
+          echo "Running brew audit on updated formula..."
+          brew audit --strict --online --formula domcyrus/rustnet/rustnet
+
+      - name: Commit and push changes
+        if: steps.check.outputs.needs_update == 'true'
+        run: |
+          VERSION="${{ steps.latest.outputs.version }}"
+
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          git add Formula/rustnet.rb
+          git commit -m "Update Rustnet to version v${VERSION}"
+          git push
+
+      - name: Create summary
+        if: always()
+        run: |
+          CURRENT="${{ steps.current.outputs.version }}"
+          LATEST="${{ steps.latest.outputs.version }}"
+          NEEDS_UPDATE="${{ steps.check.outputs.needs_update }}"
+
+          echo "### Homebrew Formula Update Check" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "- **Current Version:** v$CURRENT" >> $GITHUB_STEP_SUMMARY
+          echo "- **Latest Version:** v$LATEST" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          if [ "$NEEDS_UPDATE" = "true" ]; then
+            SHA256="${{ steps.sha256.outputs.sha256 }}"
+            echo "**Formula Updated Successfully!**" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "- **New Version:** v$LATEST" >> $GITHUB_STEP_SUMMARY
+            echo "- **SHA256:** \`${SHA256}\`" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "**Validation:**" >> $GITHUB_STEP_SUMMARY
+            echo "- Formula syntax validated with \`brew audit --strict --online\`" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "**No Update Needed**" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "The formula is already at the latest version." >> $GITHUB_STEP_SUMMARY
+          fi
