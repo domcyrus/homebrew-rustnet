@@ -28,8 +28,9 @@ jobs:
       - name: Get latest release from rustnet repo
         id: latest
         run: |
-          # Query GitHub API for latest release
-          LATEST_RELEASE=$(curl -s https://api.github.com/repos/domcyrus/rustnet/releases/latest)
+          # Query GitHub API for latest release with authentication
+          LATEST_RELEASE=$(curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
+            https://api.github.com/repos/domcyrus/rustnet/releases/latest)
           LATEST_VERSION=$(echo "$LATEST_RELEASE" | jq -r '.tag_name' | sed 's/^v//')
 
           echo "version=$LATEST_VERSION" >> $GITHUB_OUTPUT
