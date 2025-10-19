@@ -61,9 +61,16 @@ class Rustnet < Formula
         1. Run with sudo (simplest):
            sudo rustnet
 
-        2. Grant capabilities to the binary (recommended):
-           sudo setcap cap_net_raw,cap_net_admin=eip $(which rustnet)
+        2. Grant minimal capabilities (recommended - no root required!):
+           # Modern kernel (5.8+) with eBPF support:
+           sudo setcap 'cap_net_raw,cap_bpf,cap_perfmon=eip' $(which rustnet)
+
+           # Legacy kernel (older than 5.8):
+           sudo setcap 'cap_net_raw,cap_sys_admin=eip' $(which rustnet)
+
            Then run rustnet without sudo
+
+        Note: RustNet uses read-only packet capture (CAP_NET_ADMIN not required)
 
       EOS
     end
