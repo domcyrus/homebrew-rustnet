@@ -21,18 +21,17 @@ jobs:
       - name: Get current formula version
         id: current
         run: |
-          CURRENT_VERSION=$(grep -oE 'archive/refs/tags/v[0-9]+\.[0-9]+\.[0-9]+' Formula/rustnet.rb | sed 's|archive/refs/tags/v||')
+          # Extract version from the first URL in the formula
+          CURRENT_VERSION=$(grep -oE 'download/v[0-9]+\.[0-9]+\.[0-9]+/' Formula/rustnet.rb | head -1 | sed 's|download/v||; s|/||')
           echo "version=$CURRENT_VERSION" >> $GITHUB_OUTPUT
           echo "Current formula version: v$CURRENT_VERSION"
 
       - name: Get latest release from rustnet repo
         id: latest
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          # Query GitHub API for latest release with authentication
-          LATEST_RELEASE=$(curl -s -H "Authorization: token ${{ secrets.GITHUB_TOKEN }}" \
-            https://api.github.com/repos/domcyrus/rustnet/releases/latest)
-          LATEST_VERSION=$(echo "$LATEST_RELEASE" | jq -r '.tag_name' | sed 's/^v//')
-
+          LATEST_VERSION=$(gh api repos/domcyrus/rustnet/releases/latest --jq '.tag_name' | sed 's/^v//')
           echo "version=$LATEST_VERSION" >> $GITHUB_OUTPUT
           echo "Latest rustnet version: v$LATEST_VERSION"
 
@@ -50,40 +49,74 @@ jobs:
             echo "Update needed: v$CURRENT -> v$LATEST"
           fi
 
-      - name: Download release tarball and calculate SHA256
+      - name: Download binaries and calculate SHA256
         if: steps.check.outputs.needs_update == 'true'
         id: sha256
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           VERSION="${{ steps.latest.outputs.version }}"
-          URL="https://github.com/domcyrus/rustnet/archive/refs/tags/v${VERSION}.tar.gz"
+          BASE_URL="https://github.com/domcyrus/rustnet/releases/download/v${VERSION}"
 
-          echo "Downloading tarball from: $URL"
-          curl -L -o /tmp/rustnet.tar.gz "$URL"
+          echo "Downloading binaries for v${VERSION}..."
 
-          # Calculate SHA256
-          SHA256=$(shasum -a 256 /tmp/rustnet.tar.gz | awk '{print $1}')
-          echo "sha256=$SHA256" >> $GITHUB_OUTPUT
-          echo "Calculated SHA256: $SHA256"
+          # macOS ARM64
+          curl -sL "${BASE_URL}/rustnet-v${VERSION}-aarch64-apple-darwin.tar.gz" -o /tmp/macos-arm.tar.gz
+          MACOS_ARM_SHA256=$(shasum -a 256 /tmp/macos-arm.tar.gz | awk '{print $1}')
+          echo "macos_arm_sha256=$MACOS_ARM_SHA256" >> $GITHUB_OUTPUT
+          echo "macOS ARM64: $MACOS_ARM_SHA256"
+
+          # macOS Intel
+          curl -sL "${BASE_URL}/rustnet-v${VERSION}-x86_64-apple-darwin.tar.gz" -o /tmp/macos-intel.tar.gz
+          MACOS_INTEL_SHA256=$(shasum -a 256 /tmp/macos-intel.tar.gz | awk '{print $1}')
+          echo "macos_intel_sha256=$MACOS_INTEL_SHA256" >> $GITHUB_OUTPUT
+          echo "macOS Intel: $MACOS_INTEL_SHA256"
+
+          # Linux ARM64
+          curl -sL "${BASE_URL}/rustnet-v${VERSION}-aarch64-unknown-linux-gnu.tar.gz" -o /tmp/linux-arm.tar.gz
+          LINUX_ARM_SHA256=$(shasum -a 256 /tmp/linux-arm.tar.gz | awk '{print $1}')
+          echo "linux_arm_sha256=$LINUX_ARM_SHA256" >> $GITHUB_OUTPUT
+          echo "Linux ARM64: $LINUX_ARM_SHA256"
+
+          # Linux Intel
+          curl -sL "${BASE_URL}/rustnet-v${VERSION}-x86_64-unknown-linux-gnu.tar.gz" -o /tmp/linux-intel.tar.gz
+          LINUX_INTEL_SHA256=$(shasum -a 256 /tmp/linux-intel.tar.gz | awk '{print $1}')
+          echo "linux_intel_sha256=$LINUX_INTEL_SHA256" >> $GITHUB_OUTPUT
+          echo "Linux Intel: $LINUX_INTEL_SHA256"
 
           # Clean up
-          rm /tmp/rustnet.tar.gz
+          rm /tmp/*.tar.gz
 
       - name: Update formula
         if: steps.check.outputs.needs_update == 'true'
         run: |
-          VERSION="${{ steps.latest.outputs.version }}"
-          SHA256="${{ steps.sha256.outputs.sha256 }}"
+          CURRENT_VERSION="${{ steps.current.outputs.version }}"
+          NEW_VERSION="${{ steps.latest.outputs.version }}"
+          MACOS_ARM_SHA256="${{ steps.sha256.outputs.macos_arm_sha256 }}"
+          MACOS_INTEL_SHA256="${{ steps.sha256.outputs.macos_intel_sha256 }}"
+          LINUX_ARM_SHA256="${{ steps.sha256.outputs.linux_arm_sha256 }}"
+          LINUX_INTEL_SHA256="${{ steps.sha256.outputs.linux_intel_sha256 }}"
           FORMULA_FILE="Formula/rustnet.rb"
 
           echo "Updating formula with:"
-          echo "  Version: v$VERSION"
-          echo "  SHA256: $SHA256"
+          echo "  Version: v$CURRENT_VERSION -> v$NEW_VERSION"
+          echo "  macOS ARM64 SHA256: $MACOS_ARM_SHA256"
+          echo "  macOS Intel SHA256: $MACOS_INTEL_SHA256"
+          echo "  Linux ARM64 SHA256: $LINUX_ARM_SHA256"
+          echo "  Linux Intel SHA256: $LINUX_INTEL_SHA256"
 
-          # Update the URL line
-          sed -i '' "s|url \"https://github.com/domcyrus/rustnet/archive/refs/tags/v.*\.tar\.gz\"|url \"https://github.com/domcyrus/rustnet/archive/refs/tags/v${VERSION}.tar.gz\"|" "$FORMULA_FILE"
+          # Update all version occurrences in URLs (v0.16.1 -> vNEW_VERSION)
+          sed -i '' "s|/v${CURRENT_VERSION}/rustnet-v${CURRENT_VERSION}-|/v${NEW_VERSION}/rustnet-v${NEW_VERSION}-|g" "$FORMULA_FILE"
 
-          # Update the SHA256 line
-          sed -i '' "s|sha256 \".*\"|sha256 \"${SHA256}\"|" "$FORMULA_FILE"
+          # Update SHA256 hashes (in order they appear in the file)
+          # macOS ARM64 is first
+          sed -i '' "0,/sha256 \"[a-f0-9]\{64\}\"/s//sha256 \"${MACOS_ARM_SHA256}\"/" "$FORMULA_FILE"
+          # macOS Intel is second
+          sed -i '' "0,/sha256 \"[a-f0-9]\{64\}\"/s//sha256 \"${MACOS_INTEL_SHA256}\"/" "$FORMULA_FILE"
+          # Linux ARM64 is third
+          sed -i '' "0,/sha256 \"[a-f0-9]\{64\}\"/s//sha256 \"${LINUX_ARM_SHA256}\"/" "$FORMULA_FILE"
+          # Linux Intel is fourth
+          sed -i '' "0,/sha256 \"[a-f0-9]\{64\}\"/s//sha256 \"${LINUX_INTEL_SHA256}\"/" "$FORMULA_FILE"
 
           echo "Formula updated successfully"
           echo ""
@@ -136,11 +169,19 @@ jobs:
           echo "" >> $GITHUB_STEP_SUMMARY
 
           if [ "$NEEDS_UPDATE" = "true" ]; then
-            SHA256="${{ steps.sha256.outputs.sha256 }}"
+            MACOS_ARM="${{ steps.sha256.outputs.macos_arm_sha256 }}"
+            MACOS_INTEL="${{ steps.sha256.outputs.macos_intel_sha256 }}"
+            LINUX_ARM="${{ steps.sha256.outputs.linux_arm_sha256 }}"
+            LINUX_INTEL="${{ steps.sha256.outputs.linux_intel_sha256 }}"
             echo "**Formula Updated Successfully!**" >> $GITHUB_STEP_SUMMARY
             echo "" >> $GITHUB_STEP_SUMMARY
             echo "- **New Version:** v$LATEST" >> $GITHUB_STEP_SUMMARY
-            echo "- **SHA256:** \`${SHA256}\`" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "**SHA256 Checksums:**" >> $GITHUB_STEP_SUMMARY
+            echo "- macOS ARM64: \`${MACOS_ARM}\`" >> $GITHUB_STEP_SUMMARY
+            echo "- macOS Intel: \`${MACOS_INTEL}\`" >> $GITHUB_STEP_SUMMARY
+            echo "- Linux ARM64: \`${LINUX_ARM}\`" >> $GITHUB_STEP_SUMMARY
+            echo "- Linux Intel: \`${LINUX_INTEL}\`" >> $GITHUB_STEP_SUMMARY
             echo "" >> $GITHUB_STEP_SUMMARY
             echo "**Validation:**" >> $GITHUB_STEP_SUMMARY
             echo "- Formula syntax validated with \`brew audit --strict --online\`" >> $GITHUB_STEP_SUMMARY

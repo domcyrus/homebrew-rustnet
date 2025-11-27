@@ -1,26 +1,38 @@
 class Rustnet < Formula
   desc "High-performance, cross-platform network monitoring tool with TUI"
   homepage "https://github.com/domcyrus/rustnet"
-  url "https://github.com/domcyrus/rustnet/archive/refs/tags/v0.16.1.tar.gz"
-  sha256 "569254a7af632748f7e465849639ada3cf14ff3acd95da9619c38fbb5f424b27"
   license "Apache-2.0"
-
-  depends_on "pkg-config" => :build
-  depends_on "rust" => :build
 
   uses_from_macos "libpcap"
   uses_from_macos "zlib"
 
+  on_macos do
+    on_arm do
+      url "https://github.com/domcyrus/rustnet/releases/download/v0.16.1/rustnet-v0.16.1-aarch64-apple-darwin.tar.gz"
+      sha256 "a09327d8e1415eb8bcfc4d31f41d32e87d648c6e5a369ee1accfc849bf50f1a4"
+    end
+    on_intel do
+      url "https://github.com/domcyrus/rustnet/releases/download/v0.16.1/rustnet-v0.16.1-x86_64-apple-darwin.tar.gz"
+      sha256 "a1b66058c03aa08df5b0980fda86ef333cc41dd5acd49e8040acefe4a311465e"
+    end
+  end
+
   on_linux do
-    depends_on "llvm" => :build
     depends_on "elfutils"
     depends_on "libpcap"
+
+    on_arm do
+      url "https://github.com/domcyrus/rustnet/releases/download/v0.16.1/rustnet-v0.16.1-aarch64-unknown-linux-gnu.tar.gz"
+      sha256 "c8a88f122fe5c3fb59e8f59d402d1768cdf08546959c99b223c9fcd70537cf2a"
+    end
+    on_intel do
+      url "https://github.com/domcyrus/rustnet/releases/download/v0.16.1/rustnet-v0.16.1-x86_64-unknown-linux-gnu.tar.gz"
+      sha256 "d589d753200759232bfdfbc7dec9191ad86c6fafa0f3122c873daa05b2dc152f"
+    end
   end
 
   def install
-    args = std_cargo_args
-    args += ["--features", "linux-default"] if OS.linux?
-    system "cargo", "install", *args
+    bin.install Dir["*/rustnet"].first
   end
 
   def caveats
