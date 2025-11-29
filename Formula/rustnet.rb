@@ -32,7 +32,7 @@ class Rustnet < Formula
   end
 
   def install
-    bin.install Dir["*/rustnet"].first
+    bin.install "rustnet"
   end
 
   def caveats
