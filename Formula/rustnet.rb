@@ -9,11 +9,11 @@ class Rustnet < Formula
   on_macos do
     on_arm do
       url "https://github.com/domcyrus/rustnet/releases/download/v0.17.0/rustnet-v0.17.0-aarch64-apple-darwin.tar.gz"
-      sha256 "a09327d8e1415eb8bcfc4d31f41d32e87d648c6e5a369ee1accfc849bf50f1a4"
+      sha256 "91008538d02d05cdf16175bdaddddb510f88bbe4684acc2cebac702ed310f82a"
     end
     on_intel do
       url "https://github.com/domcyrus/rustnet/releases/download/v0.17.0/rustnet-v0.17.0-x86_64-apple-darwin.tar.gz"
-      sha256 "a1b66058c03aa08df5b0980fda86ef333cc41dd5acd49e8040acefe4a311465e"
+      sha256 "d2d5b55ba4bfc6b451b91caf17b813b465ec07f2a8abe17c4fa49ef695895014"
     end
   end
 
@@ -23,11 +23,11 @@ class Rustnet < Formula
 
     on_arm do
       url "https://github.com/domcyrus/rustnet/releases/download/v0.17.0/rustnet-v0.17.0-aarch64-unknown-linux-gnu.tar.gz"
-      sha256 "c8a88f122fe5c3fb59e8f59d402d1768cdf08546959c99b223c9fcd70537cf2a"
+      sha256 "7638dee6e2a7fd03e30a32e3ff1159a00c232b8955d42cd2027fef4c0c4dcdf1"
     end
     on_intel do
       url "https://github.com/domcyrus/rustnet/releases/download/v0.17.0/rustnet-v0.17.0-x86_64-unknown-linux-gnu.tar.gz"
-      sha256 "d589d753200759232bfdfbc7dec9191ad86c6fafa0f3122c873daa05b2dc152f"
+      sha256 "79e0904424a984893227db289b81d8b32f6f2c89e864285011df9d03d8f00fd9"
     end
   end
 

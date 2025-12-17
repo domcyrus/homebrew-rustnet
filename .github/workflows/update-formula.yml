@@ -105,18 +105,32 @@ jobs:
           echo "  Linux ARM64 SHA256: $LINUX_ARM_SHA256"
           echo "  Linux Intel SHA256: $LINUX_INTEL_SHA256"
 
-          # Update all version occurrences in URLs (v0.16.1 -> vNEW_VERSION)
-          sed -i '' "s|/v${CURRENT_VERSION}/rustnet-v${CURRENT_VERSION}-|/v${NEW_VERSION}/rustnet-v${NEW_VERSION}-|g" "$FORMULA_FILE"
+          # Use Ruby to update the formula (BSD sed doesn't support GNU sed's 0,/pattern/ syntax)
+          ruby -e '
+            checksums = {
+              "aarch64-apple-darwin" => ENV["MACOS_ARM_SHA256"],
+              "x86_64-apple-darwin" => ENV["MACOS_INTEL_SHA256"],
+              "aarch64-unknown-linux-gnu" => ENV["LINUX_ARM_SHA256"],
+              "x86_64-unknown-linux-gnu" => ENV["LINUX_INTEL_SHA256"]
+            }
+            old_version = ENV["CURRENT_VERSION"]
+            new_version = ENV["NEW_VERSION"]
+            formula_path = ENV["FORMULA_FILE"]
 
-          # Update SHA256 hashes (in order they appear in the file)
-          # macOS ARM64 is first
-          sed -i '' "0,/sha256 \"[a-f0-9]\{64\}\"/s//sha256 \"${MACOS_ARM_SHA256}\"/" "$FORMULA_FILE"
-          # macOS Intel is second
-          sed -i '' "0,/sha256 \"[a-f0-9]\{64\}\"/s//sha256 \"${MACOS_INTEL_SHA256}\"/" "$FORMULA_FILE"
-          # Linux ARM64 is third
-          sed -i '' "0,/sha256 \"[a-f0-9]\{64\}\"/s//sha256 \"${LINUX_ARM_SHA256}\"/" "$FORMULA_FILE"
-          # Linux Intel is fourth
-          sed -i '' "0,/sha256 \"[a-f0-9]\{64\}\"/s//sha256 \"${LINUX_INTEL_SHA256}\"/" "$FORMULA_FILE"
+            content = File.read(formula_path)
+
+            # Update version in URLs
+            content.gsub!("/v#{old_version}/rustnet-v#{old_version}-", "/v#{new_version}/rustnet-v#{new_version}-")
+
+            # Update SHA256 for each platform by finding url line and updating following sha256
+            checksums.each do |platform, sha|
+              content.gsub!(/(url\s+"[^"]*#{Regexp.escape(platform)}[^"]*"\s*\n\s*sha256\s+")[a-f0-9]{64}(")/) do
+                "#{$1}#{sha}#{$2}"
+              end
+            end
+
+            File.write(formula_path, content)
+          '
 
           echo "Formula updated successfully"
           echo ""
