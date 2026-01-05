@@ -1,12 +1,12 @@
 name: Update Homebrew Formula
 
 on:
-  # Run every hour
-  schedule:
-    - cron: '0 * * * *'
-
-  # Allow manual trigger for testing
   workflow_dispatch:
+    inputs:
+      version:
+        description: 'RustNet version to update to (e.g., 0.18.0)'
+        required: true
+        type: string
 
 jobs:
   check-and-update:
@@ -26,27 +26,26 @@ jobs:
           echo "version=$CURRENT_VERSION" >> $GITHUB_OUTPUT
           echo "Current formula version: v$CURRENT_VERSION"
 
-      - name: Get latest release from rustnet repo
-        id: latest
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Normalize version input
+        id: version
         run: |
-          LATEST_VERSION=$(gh api repos/domcyrus/rustnet/releases/latest --jq '.tag_name' | sed 's/^v//')
-          echo "version=$LATEST_VERSION" >> $GITHUB_OUTPUT
-          echo "Latest rustnet version: v$LATEST_VERSION"
+          # Strip 'v' prefix if provided (e.g., v0.18.0 -> 0.18.0)
+          VERSION=$(echo "${{ inputs.version }}" | sed 's/^v//')
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "Target version: v$VERSION"
 
       - name: Check if update is needed
         id: check
         run: |
           CURRENT="${{ steps.current.outputs.version }}"
-          LATEST="${{ steps.latest.outputs.version }}"
+          TARGET="${{ steps.version.outputs.version }}"
 
-          if [ "$CURRENT" = "$LATEST" ]; then
+          if [ "$CURRENT" = "$TARGET" ]; then
             echo "needs_update=false" >> $GITHUB_OUTPUT
             echo "Formula is already up to date (v$CURRENT)"
           else
             echo "needs_update=true" >> $GITHUB_OUTPUT
-            echo "Update needed: v$CURRENT -> v$LATEST"
+            echo "Update needed: v$CURRENT -> v$TARGET"
           fi
 
       - name: Download binaries and calculate SHA256
@@ -55,7 +54,7 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          VERSION="${{ steps.latest.outputs.version }}"
+          VERSION="${{ steps.version.outputs.version }}"
           BASE_URL="https://github.com/domcyrus/rustnet/releases/download/v${VERSION}"
 
           echo "Downloading binaries for v${VERSION}..."
@@ -91,7 +90,7 @@ jobs:
         if: steps.check.outputs.needs_update == 'true'
         run: |
           CURRENT_VERSION="${{ steps.current.outputs.version }}"
-          NEW_VERSION="${{ steps.latest.outputs.version }}"
+          NEW_VERSION="${{ steps.version.outputs.version }}"
           MACOS_ARM_SHA256="${{ steps.sha256.outputs.macos_arm_sha256 }}"
           MACOS_INTEL_SHA256="${{ steps.sha256.outputs.macos_intel_sha256 }}"
           LINUX_ARM_SHA256="${{ steps.sha256.outputs.linux_arm_sha256 }}"
@@ -160,7 +159,7 @@ jobs:
       - name: Commit and push changes
         if: steps.check.outputs.needs_update == 'true'
         run: |
-          VERSION="${{ steps.latest.outputs.version }}"
+          VERSION="${{ steps.version.outputs.version }}"
 
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
@@ -173,7 +172,7 @@ jobs:
         if: always()
         run: |
           CURRENT="${{ steps.current.outputs.version }}"
-          LATEST="${{ steps.latest.outputs.version }}"
+          LATEST="${{ steps.version.outputs.version }}"
           NEEDS_UPDATE="${{ steps.check.outputs.needs_update }}"
 
           echo "### Homebrew Formula Update Check" >> $GITHUB_STEP_SUMMARY
