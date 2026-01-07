@@ -88,15 +88,15 @@ jobs:
 
       - name: Update formula
         if: steps.check.outputs.needs_update == 'true'
+        env:
+          CURRENT_VERSION: ${{ steps.current.outputs.version }}
+          NEW_VERSION: ${{ steps.version.outputs.version }}
+          MACOS_ARM_SHA256: ${{ steps.sha256.outputs.macos_arm_sha256 }}
+          MACOS_INTEL_SHA256: ${{ steps.sha256.outputs.macos_intel_sha256 }}
+          LINUX_ARM_SHA256: ${{ steps.sha256.outputs.linux_arm_sha256 }}
+          LINUX_INTEL_SHA256: ${{ steps.sha256.outputs.linux_intel_sha256 }}
+          FORMULA_FILE: Formula/rustnet.rb
         run: |
-          CURRENT_VERSION="${{ steps.current.outputs.version }}"
-          NEW_VERSION="${{ steps.version.outputs.version }}"
-          MACOS_ARM_SHA256="${{ steps.sha256.outputs.macos_arm_sha256 }}"
-          MACOS_INTEL_SHA256="${{ steps.sha256.outputs.macos_intel_sha256 }}"
-          LINUX_ARM_SHA256="${{ steps.sha256.outputs.linux_arm_sha256 }}"
-          LINUX_INTEL_SHA256="${{ steps.sha256.outputs.linux_intel_sha256 }}"
-          FORMULA_FILE="Formula/rustnet.rb"
-
           echo "Updating formula with:"
           echo "  Version: v$CURRENT_VERSION -> v$NEW_VERSION"
           echo "  macOS ARM64 SHA256: $MACOS_ARM_SHA256"
