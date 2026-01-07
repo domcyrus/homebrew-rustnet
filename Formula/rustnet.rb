@@ -8,12 +8,12 @@ class Rustnet < Formula
 
   on_macos do
     on_arm do
-      url "https://github.com/domcyrus/rustnet/releases/download/v0.17.0/rustnet-v0.17.0-aarch64-apple-darwin.tar.gz"
-      sha256 "91008538d02d05cdf16175bdaddddb510f88bbe4684acc2cebac702ed310f82a"
+      url "https://github.com/domcyrus/rustnet/releases/download/v0.18.0/rustnet-v0.18.0-aarch64-apple-darwin.tar.gz"
+      sha256 "1dc693976535fe4d45eac5f027aa81bd2e42d000de6a61f6cd9ddf2f1a5176b9"
     end
     on_intel do
-      url "https://github.com/domcyrus/rustnet/releases/download/v0.17.0/rustnet-v0.17.0-x86_64-apple-darwin.tar.gz"
-      sha256 "d2d5b55ba4bfc6b451b91caf17b813b465ec07f2a8abe17c4fa49ef695895014"
+      url "https://github.com/domcyrus/rustnet/releases/download/v0.18.0/rustnet-v0.18.0-x86_64-apple-darwin.tar.gz"
+      sha256 "ea41329209cc1191196ffef685c0e3cde20b99eab798a6b4506a9059cdfc22fa"
     end
   end
 
@@ -22,12 +22,12 @@ class Rustnet < Formula
     depends_on "libpcap"
 
     on_arm do
-      url "https://github.com/domcyrus/rustnet/releases/download/v0.17.0/rustnet-v0.17.0-aarch64-unknown-linux-gnu.tar.gz"
-      sha256 "7638dee6e2a7fd03e30a32e3ff1159a00c232b8955d42cd2027fef4c0c4dcdf1"
+      url "https://github.com/domcyrus/rustnet/releases/download/v0.18.0/rustnet-v0.18.0-aarch64-unknown-linux-gnu.tar.gz"
+      sha256 "a35633d57b30c89a635ed8c940e99726ca263b094f53a22d6f2fc363726055a8"
     end
     on_intel do
-      url "https://github.com/domcyrus/rustnet/releases/download/v0.17.0/rustnet-v0.17.0-x86_64-unknown-linux-gnu.tar.gz"
-      sha256 "79e0904424a984893227db289b81d8b32f6f2c89e864285011df9d03d8f00fd9"
+      url "https://github.com/domcyrus/rustnet/releases/download/v0.18.0/rustnet-v0.18.0-x86_64-unknown-linux-gnu.tar.gz"
+      sha256 "e9885fee122daa91bce76d2e13dfe6c52108da30098632336b01039f09fc8a1e"
     end
   end
 
