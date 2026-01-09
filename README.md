@@ -41,7 +41,7 @@ rustnet
 sudo rustnet
 
 # Option 2: Grant capabilities to the binary
-sudo setcap cap_net_raw,cap_net_admin=eip $(which rustnet)
+sudo setcap 'cap_net_raw,cap_bpf,cap_perfmon=eip' $(which rustnet)
 rustnet
 ```
 
