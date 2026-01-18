@@ -18,16 +18,14 @@ class Rustnet < Formula
   end
 
   on_linux do
-    depends_on "elfutils"
-    depends_on "libpcap"
-
+    # Static musl binaries - no runtime dependencies needed
     on_arm do
-      url "https://github.com/domcyrus/rustnet/releases/download/v0.18.0/rustnet-v0.18.0-aarch64-unknown-linux-gnu.tar.gz"
-      sha256 "a35633d57b30c89a635ed8c940e99726ca263b094f53a22d6f2fc363726055a8"
+      url "https://github.com/domcyrus/rustnet/releases/download/v0.18.0/rustnet-v0.18.0-aarch64-unknown-linux-musl.tar.gz"
+      sha256 "e3c097528504de233f455a8ac4f1cccf3fb584ecbab9b68b275faf4d78b4a1dc"
     end
     on_intel do
-      url "https://github.com/domcyrus/rustnet/releases/download/v0.18.0/rustnet-v0.18.0-x86_64-unknown-linux-gnu.tar.gz"
-      sha256 "e9885fee122daa91bce76d2e13dfe6c52108da30098632336b01039f09fc8a1e"
+      url "https://github.com/domcyrus/rustnet/releases/download/v0.18.0/rustnet-v0.18.0-x86_64-unknown-linux-musl.tar.gz"
+      sha256 "c808de9a7dd08b41a34c6e6eed41171c12454c277a72d55a715e54a005fb6d60"
     end
   end
 
@@ -71,14 +69,17 @@ class Rustnet < Formula
         On Linux, you have two options:
 
         1. Run with sudo (simplest):
-           sudo rustnet
+           sudo $(which rustnet)
 
         2. Grant minimal capabilities (recommended - no root required!):
+           # Resolve symlink first (setcap doesn't work on symlinks)
+           RUSTNET_BIN=$(realpath $(which rustnet))
+
            # Modern kernel (5.8+) with eBPF support:
-           sudo setcap 'cap_net_raw,cap_bpf,cap_perfmon=eip' $(which rustnet)
+           sudo setcap 'cap_net_raw,cap_bpf,cap_perfmon=eip' "$RUSTNET_BIN"
 
            # Legacy kernel (older than 5.8):
-           sudo setcap 'cap_net_raw,cap_sys_admin=eip' $(which rustnet)
+           sudo setcap 'cap_net_raw,cap_sys_admin=eip' "$RUSTNET_BIN"
 
            Then run rustnet without sudo
 
