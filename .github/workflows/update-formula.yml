@@ -71,14 +71,14 @@ jobs:
           echo "macos_intel_sha256=$MACOS_INTEL_SHA256" >> $GITHUB_OUTPUT
           echo "macOS Intel: $MACOS_INTEL_SHA256"
 
-          # Linux ARM64
-          curl -sL "${BASE_URL}/rustnet-v${VERSION}-aarch64-unknown-linux-gnu.tar.gz" -o /tmp/linux-arm.tar.gz
+          # Linux ARM64 (musl static binary)
+          curl -sL "${BASE_URL}/rustnet-v${VERSION}-aarch64-unknown-linux-musl.tar.gz" -o /tmp/linux-arm.tar.gz
           LINUX_ARM_SHA256=$(shasum -a 256 /tmp/linux-arm.tar.gz | awk '{print $1}')
           echo "linux_arm_sha256=$LINUX_ARM_SHA256" >> $GITHUB_OUTPUT
           echo "Linux ARM64: $LINUX_ARM_SHA256"
 
-          # Linux Intel
-          curl -sL "${BASE_URL}/rustnet-v${VERSION}-x86_64-unknown-linux-gnu.tar.gz" -o /tmp/linux-intel.tar.gz
+          # Linux Intel (musl static binary)
+          curl -sL "${BASE_URL}/rustnet-v${VERSION}-x86_64-unknown-linux-musl.tar.gz" -o /tmp/linux-intel.tar.gz
           LINUX_INTEL_SHA256=$(shasum -a 256 /tmp/linux-intel.tar.gz | awk '{print $1}')
           echo "linux_intel_sha256=$LINUX_INTEL_SHA256" >> $GITHUB_OUTPUT
           echo "Linux Intel: $LINUX_INTEL_SHA256"
@@ -109,8 +109,8 @@ jobs:
             checksums = {
               "aarch64-apple-darwin" => ENV["MACOS_ARM_SHA256"],
               "x86_64-apple-darwin" => ENV["MACOS_INTEL_SHA256"],
-              "aarch64-unknown-linux-gnu" => ENV["LINUX_ARM_SHA256"],
-              "x86_64-unknown-linux-gnu" => ENV["LINUX_INTEL_SHA256"]
+              "aarch64-unknown-linux-musl" => ENV["LINUX_ARM_SHA256"],
+              "x86_64-unknown-linux-musl" => ENV["LINUX_INTEL_SHA256"]
             }
             old_version = ENV["CURRENT_VERSION"]
             new_version = ENV["NEW_VERSION"]

@@ -35,13 +35,15 @@ brew install --cask wireshark-chmodbpf
 rustnet
 ```
 
-### Linux  
+### Linux
 ```bash
 # Option 1: Run with sudo
-sudo rustnet
+sudo $(which rustnet)
 
 # Option 2: Grant capabilities to the binary
-sudo setcap 'cap_net_raw,cap_bpf,cap_perfmon=eip' $(which rustnet)
+# Resolve symlink first (setcap doesn't work on symlinks)
+RUSTNET_BIN=$(realpath $(which rustnet))
+sudo setcap 'cap_net_raw,cap_bpf,cap_perfmon=eip' "$RUSTNET_BIN"
 rustnet
 ```
 
