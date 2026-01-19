@@ -128,6 +128,9 @@ jobs:
               end
             end
 
+            # Remove revision line (reset for new version)
+            content.gsub!(/^\s*revision\s+\d+\s*\n/, "")
+
             File.write(formula_path, content)
           '
 

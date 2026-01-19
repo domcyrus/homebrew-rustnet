@@ -2,6 +2,7 @@ class Rustnet < Formula
   desc "High-performance, cross-platform network monitoring tool with TUI"
   homepage "https://github.com/domcyrus/rustnet"
   license "Apache-2.0"
+  revision 1
 
   uses_from_macos "libpcap"
   uses_from_macos "zlib"
