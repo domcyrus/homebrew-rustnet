@@ -90,6 +90,13 @@ class Rustnet < Formula
     end
 
     s += <<~EOS
+      GeoIP (optional):
+        To show country codes for remote IPs, install GeoLite2 databases:
+          brew install geoipupdate
+        Edit #{HOMEBREW_PREFIX}/etc/GeoIP.conf with your free MaxMind credentials,
+        then run: geoipupdate
+        See: https://github.com/domcyrus/rustnet/blob/main/INSTALL.md#geoip-databases-optional
+
       For more information, see: https://github.com/domcyrus/rustnet#permissions
     EOS
 
