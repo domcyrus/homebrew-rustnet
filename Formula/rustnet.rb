@@ -2,31 +2,29 @@ class Rustnet < Formula
   desc "High-performance, cross-platform network monitoring tool with TUI"
   homepage "https://github.com/domcyrus/rustnet"
   license "Apache-2.0"
-  revision 1
-
   uses_from_macos "libpcap"
   uses_from_macos "zlib"
 
   on_macos do
     on_arm do
-      url "https://github.com/domcyrus/rustnet/releases/download/v0.18.0/rustnet-v0.18.0-aarch64-apple-darwin.tar.gz"
-      sha256 "1dc693976535fe4d45eac5f027aa81bd2e42d000de6a61f6cd9ddf2f1a5176b9"
+      url "https://github.com/domcyrus/rustnet/releases/download/v1.0.0/rustnet-v1.0.0-aarch64-apple-darwin.tar.gz"
+      sha256 "d8e6ba0bc890c0f47d1f5f9359ec201e964a043c593c414d7f82288feae84bfe"
     end
     on_intel do
-      url "https://github.com/domcyrus/rustnet/releases/download/v0.18.0/rustnet-v0.18.0-x86_64-apple-darwin.tar.gz"
-      sha256 "ea41329209cc1191196ffef685c0e3cde20b99eab798a6b4506a9059cdfc22fa"
+      url "https://github.com/domcyrus/rustnet/releases/download/v1.0.0/rustnet-v1.0.0-x86_64-apple-darwin.tar.gz"
+      sha256 "db3287468888fc42bd91e3764fa4fcafeb6ae54dcee5be14a13f45829d495c52"
     end
   end
 
   on_linux do
     # Static musl binaries - no runtime dependencies needed
     on_arm do
-      url "https://github.com/domcyrus/rustnet/releases/download/v0.18.0/rustnet-v0.18.0-aarch64-unknown-linux-musl.tar.gz"
-      sha256 "e3c097528504de233f455a8ac4f1cccf3fb584ecbab9b68b275faf4d78b4a1dc"
+      url "https://github.com/domcyrus/rustnet/releases/download/v1.0.0/rustnet-v1.0.0-aarch64-unknown-linux-musl.tar.gz"
+      sha256 "0019dfc4b32d63c1392aa264aed2253c1e0c2fb09216f8e2cc269bbfb8bb49b5"
     end
     on_intel do
-      url "https://github.com/domcyrus/rustnet/releases/download/v0.18.0/rustnet-v0.18.0-x86_64-unknown-linux-musl.tar.gz"
-      sha256 "c808de9a7dd08b41a34c6e6eed41171c12454c277a72d55a715e54a005fb6d60"
+      url "https://github.com/domcyrus/rustnet/releases/download/v1.0.0/rustnet-v1.0.0-x86_64-unknown-linux-musl.tar.gz"
+      sha256 "7f8042a6a8d9c2ea5919ac5d1b262ebc8ec36f1ea5b89068231a2ca754d9aaf7"
     end
   end
 
