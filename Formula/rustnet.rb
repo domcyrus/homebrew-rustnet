@@ -20,7 +20,7 @@ class Rustnet < Formula
     # Static musl binaries - no runtime dependencies needed
     on_arm do
       url "https://github.com/domcyrus/rustnet/releases/download/v1.0.0/rustnet-v1.0.0-aarch64-unknown-linux-musl.tar.gz"
-      sha256 "0019dfc4b32d63c1392aa264aed2253c1e0c2fb09216f8e2cc269bbfb8bb49b5"
+      sha256 "a31ed67bed4d25b7fdbb9d2f2b1e81be0f97c23b4c5e92c74d751255bf4fbc0e"
     end
     on_intel do
       url "https://github.com/domcyrus/rustnet/releases/download/v1.0.0/rustnet-v1.0.0-x86_64-unknown-linux-musl.tar.gz"
