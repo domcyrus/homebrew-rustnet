@@ -47,6 +47,10 @@ sudo setcap 'cap_net_raw,cap_bpf,cap_perfmon=eip' "$RUSTNET_BIN"
 rustnet
 ```
 
+## GeoIP Databases (Optional)
+
+RustNet supports GeoIP lookups to show country codes for remote IPs. Install the GeoLite2 databases via `brew install geoipupdate` (requires a free MaxMind account). See the [GeoIP setup guide](https://github.com/domcyrus/rustnet/blob/main/INSTALL.md#geoip-databases-optional) for full instructions.
+
 ## Automatic Updates
 
 This tap is automatically updated hourly via GitHub Actions. When a new RustNet release is published, the formula is updated with the latest version and SHA256 checksum.
