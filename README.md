@@ -62,3 +62,6 @@ This tap is automatically updated hourly via GitHub Actions. When a new RustNet 
   - **Permissions**: https://github.com/domcyrus/rustnet/blob/main/INSTALL.md#permissions-setup
 - **Issues**: https://github.com/domcyrus/rustnet/issues
 
+## License
+
+Apache License 2.0 - see the [LICENSE](https://github.com/domcyrus/rustnet/blob/main/LICENSE) in the main RustNet repository.
