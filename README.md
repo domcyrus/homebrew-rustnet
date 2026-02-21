@@ -49,7 +49,14 @@ rustnet
 
 ## GeoIP Databases (Optional)
 
-RustNet supports GeoIP lookups to show country codes for remote IPs. Install the GeoLite2 databases via `brew install geoipupdate` (requires a free MaxMind account). See the [GeoIP setup guide](https://github.com/domcyrus/rustnet/blob/main/INSTALL.md#geoip-databases-optional) for full instructions.
+RustNet supports GeoIP lookups to show country codes, city names, and ASN information for remote IPs. Install the GeoLite2 databases via `brew install geoipupdate` (requires a free MaxMind account), then set `EditionIDs` in `$(brew --prefix)/etc/GeoIP.conf`:
+
+```
+# City database includes country data — no need for GeoLite2-Country:
+EditionIDs GeoLite2-City GeoLite2-ASN
+```
+
+Then run `geoipupdate` to download the databases. See the [GeoIP setup guide](https://github.com/domcyrus/rustnet/blob/main/INSTALL.md#geoip-databases-optional) for full instructions.
 
 ## Automatic Updates
 
