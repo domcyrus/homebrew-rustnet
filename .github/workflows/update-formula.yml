@@ -37,14 +37,13 @@ jobs:
       - name: Check if update is needed
         id: check
         run: |
+          # Always run: even if the version matches, checksums may be stale
+          echo "needs_update=true" >> $GITHUB_OUTPUT
           CURRENT="${{ steps.current.outputs.version }}"
           TARGET="${{ steps.version.outputs.version }}"
-
           if [ "$CURRENT" = "$TARGET" ]; then
-            echo "needs_update=false" >> $GITHUB_OUTPUT
-            echo "Formula is already up to date (v$CURRENT)"
+            echo "Same version (v$CURRENT) — will verify checksums are correct"
           else
-            echo "needs_update=true" >> $GITHUB_OUTPUT
             echo "Update needed: v$CURRENT -> v$TARGET"
           fi
 
@@ -159,6 +158,47 @@ jobs:
         run: |
           brew untap temp/rustnet || true
 
+      - name: Verify checksums match release assets
+        if: steps.check.outputs.needs_update == 'true'
+        env:
+          MACOS_ARM_SHA256: ${{ steps.sha256.outputs.macos_arm_sha256 }}
+          MACOS_INTEL_SHA256: ${{ steps.sha256.outputs.macos_intel_sha256 }}
+          LINUX_ARM_SHA256: ${{ steps.sha256.outputs.linux_arm_sha256 }}
+          LINUX_INTEL_SHA256: ${{ steps.sha256.outputs.linux_intel_sha256 }}
+        run: |
+          VERSION="${{ steps.version.outputs.version }}"
+          BASE_URL="https://github.com/domcyrus/rustnet/releases/download/v${VERSION}"
+          FAILED=0
+
+          echo "Re-downloading assets to verify checksums are stable..."
+          for pair in \
+            "aarch64-apple-darwin:$MACOS_ARM_SHA256" \
+            "x86_64-apple-darwin:$MACOS_INTEL_SHA256" \
+            "aarch64-unknown-linux-musl:$LINUX_ARM_SHA256" \
+            "x86_64-unknown-linux-musl:$LINUX_INTEL_SHA256"; do
+            PLATFORM="${pair%%:*}"
+            EXPECTED="${pair##*:}"
+            FILE="/tmp/verify-${PLATFORM}.tar.gz"
+
+            curl -sL "${BASE_URL}/rustnet-v${VERSION}-${PLATFORM}.tar.gz" -o "$FILE"
+            ACTUAL=$(shasum -a 256 "$FILE" | awk '{print $1}')
+            rm -f "$FILE"
+
+            if [ "$ACTUAL" != "$EXPECTED" ]; then
+              echo "::error::Checksum mismatch for ${PLATFORM}: expected ${EXPECTED}, got ${ACTUAL}"
+              echo "  Assets may have been replaced between downloads. Do NOT push stale checksums."
+              FAILED=1
+            else
+              echo "  ✓ ${PLATFORM} checksum verified"
+            fi
+          done
+
+          if [ "$FAILED" -ne 0 ]; then
+            echo "::error::Checksum verification failed — aborting to prevent pushing stale checksums"
+            exit 1
+          fi
+          echo "All checksums verified successfully"
+
       - name: Commit and push changes
         if: steps.check.outputs.needs_update == 'true'
         run: |
@@ -168,8 +208,14 @@ jobs:
           git config user.email "github-actions[bot]@users.noreply.github.com"
 
           git add Formula/rustnet.rb
-          git commit -m "Update Rustnet to version v${VERSION}"
-          git push
+
+          # Only push if there are actual changes
+          if git diff --cached --quiet; then
+            echo "No checksum changes needed — formula already correct"
+          else
+            git commit -m "Update Rustnet to version v${VERSION}"
+            git push
+          fi
 
       - name: Create summary
         if: always()
