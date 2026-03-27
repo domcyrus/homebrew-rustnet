@@ -1,0 +1,5 @@
+# GPG/PGP key material — never commit private keys
+*.asc
+*.gpg
+*.pgp
+trustdb-backup.txt
