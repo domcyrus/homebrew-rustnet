@@ -7,24 +7,24 @@ class Rustnet < Formula
 
   on_macos do
     on_arm do
-      url "https://github.com/domcyrus/rustnet/releases/download/v1.2.0/rustnet-v1.2.0-aarch64-apple-darwin.tar.gz"
-      sha256 "d231809e250fae85db0ab50cd87402a579adecdd34c98792f1400b1c43f81b48"
+      url "https://github.com/domcyrus/rustnet/releases/download/v1.3.0/rustnet-v1.3.0-aarch64-apple-darwin.tar.gz"
+      sha256 "15f8234fd13d289dd78d22e447de7f3502193b80820ea6920459d0c39c4ae7fc"
     end
     on_intel do
-      url "https://github.com/domcyrus/rustnet/releases/download/v1.2.0/rustnet-v1.2.0-x86_64-apple-darwin.tar.gz"
-      sha256 "1efe67a062c5e2bc45a6124e4116393fa58ec383111f02597d96c4b34d8e430d"
+      url "https://github.com/domcyrus/rustnet/releases/download/v1.3.0/rustnet-v1.3.0-x86_64-apple-darwin.tar.gz"
+      sha256 "2b5bff7c89dfe1eee3c1998c9759b88d01241254db298dcf863604964f837dc9"
     end
   end
 
   on_linux do
     # Static musl binaries - no runtime dependencies needed
     on_arm do
-      url "https://github.com/domcyrus/rustnet/releases/download/v1.2.0/rustnet-v1.2.0-aarch64-unknown-linux-musl.tar.gz"
-      sha256 "de32a1aa32192fb02d46af601171f3c0f044e9ecee0aaac8544ed4815915e8b2"
+      url "https://github.com/domcyrus/rustnet/releases/download/v1.3.0/rustnet-v1.3.0-aarch64-unknown-linux-musl.tar.gz"
+      sha256 "6f02b6e79b17a82d92cab75f6d0b2d9030619c48f30d3dae939c60b4e740236f"
     end
     on_intel do
-      url "https://github.com/domcyrus/rustnet/releases/download/v1.2.0/rustnet-v1.2.0-x86_64-unknown-linux-musl.tar.gz"
-      sha256 "943b645c40ea8ce22d72a4579f3f9c43c2b33353b9786ce3a38632e18a212626"
+      url "https://github.com/domcyrus/rustnet/releases/download/v1.3.0/rustnet-v1.3.0-x86_64-unknown-linux-musl.tar.gz"
+      sha256 "f121afa4d09f0fa4d5b038e0e95b586b6a8a3411b064f5448a316a36e1050cca"
     end
   end
 
