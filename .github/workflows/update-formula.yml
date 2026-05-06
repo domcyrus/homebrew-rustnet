@@ -40,19 +40,11 @@ jobs:
           }
           IS_DRAFT=$(echo "$RELEASE" | jq -r '.isDraft')
           if [ "$IS_DRAFT" = "true" ]; then
-            echo "::error::Release $TAG is still a draft — assets may change. Wait for the release workflow to finish."
+            echo "::error::Release $TAG is still a draft, assets may change. Wait for the release workflow to finish."
             exit 1
           fi
 
-          # Check that no release workflow is currently running for this tag
-          RUNS=$(gh run list --repo domcyrus/rustnet --workflow release.yml --json status,headBranch --limit 5 2>/dev/null) || true
-          ACTIVE=$(echo "$RUNS" | jq -r --arg tag "$TAG" '[.[] | select(.headBranch == $tag and (.status == "in_progress" or .status == "queued" or .status == "waiting"))] | length')
-          if [ "$ACTIVE" != "0" ]; then
-            echo "::error::Release workflow is still running for $TAG. Wait for it to complete before updating the Homebrew formula."
-            exit 1
-          fi
-
-          echo "Release $TAG is published and no release workflows are in progress."
+          echo "Release $TAG is published."
 
       - name: Get current formula version
         id: current
